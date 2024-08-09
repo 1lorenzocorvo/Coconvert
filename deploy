@@ -85,3 +85,26 @@
     </script>
 </body>
 </html>
+from flask import Flask, request, send_file
+import subprocess
+import os
+
+app = Flask(__name__)
+
+@app.route('/convert', methods=['POST'])
+def convert_file():
+    file = request.files['file']
+    format = request.form['format']
+    input_filename = 'input.' + file.filename.split('.')[-1]
+    output_filename = 'output.' + format
+    
+    file.save(input_filename)
+    
+    # Utilizza FFmpeg per convertire il file
+    subprocess.run(['ffmpeg', '-i', input_filename, output_filename])
+    
+    # Ritorna il file convertito
+    return send_file(output_filename, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
